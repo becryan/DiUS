@@ -15,14 +15,26 @@ Business Rules:
 input shopping cart items as list:  python Store.py 
 
 ### Solution explanation:
-Store owner maintains a spreadsheet repesenting the items avialable including their discount or bundling rules:
-    ipd = Product('ipd','Super ipad','549.99','bulkmin','4','50',None)
-    mbp=Product('mbp','MacBook Pro','1399.99','bundled','1','0','vga')
-    atv=Product('atv','Apple TV','109.50','buyYgetX','3','73',None)
-    vga = Product('vga','VGA adaptor','30.00','bundledfree','0','0',None)
-discounttype =['bulkmin','bundled','buyYgetX']
-bundleKey-if an item can have another item type bundled, reference the item SKU in this field
-minitems - if bulkMin or buyYgetX , specify the min purchase before this form of discount can be applied.
+Store owner maintains a spreadsheet repesenting the items available including their discount or bundling rules:
+
+where discounttype =['bulkmin','bundled','buyYgetX']
+
+and bundleKey is the SKU of the entitled free item for an item whose discounttype is marked as 'bundled'
+
+and minitems is the min number of items to apply a discounttype (for bulkmin and buyYgetX)
+
+`SKU,name,price,discounttype,minitems,discount,bundleKey
+'ipd','Super ipad','549.99','bulkmin',4,'50',None,
+'mpb','MacBook Pro','1399.99','bundled',1,'0','vga'
+'atv','Apple TV','109.50','bulkxforx',3,'87.59',None
+'vga','VGA adaptor','30.00','bundled',None,'-30.0',None`
+
+products are initialised using the Product class:
+e.g. :
+
+` ipd = Product('ipd','Super ipad','549.99','bulkmin','4','50',None)`
+
+
 
 The logic of bundle discounts ,buyYgetX, and bulkMin is programmed and the store owner need only update or add to their list.
 
