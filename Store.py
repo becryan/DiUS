@@ -17,14 +17,16 @@ class Product(object):
         self.bundledKey=bundledKey
 
     def __str__(self):
-        return "Name: %s \n Price: %s\n" %(self.name,self.price) 
+        return "Name: %s \nPrice: %s\n" %(self.name,self.price) 
 
 
 class Checkout:
     ''''''
-    def __init__(self, products=[]):
+    def __init__(self, products=[],ItemsDict={}):
+        self.products=products
+        self.ItemsDict=ItemsDict
         self.itemised_list=[[x,products.count(x)] for x in set(products)]
-
+        
     def checkout(self):
         total_price = 0.00        
 
@@ -34,6 +36,7 @@ class Checkout:
             total_price+=price
 
         return Order(self.itemised_list,total_price)
+    
 
 class Order:
     def __init__(self, products_ordered,total_price=0):
@@ -84,23 +87,19 @@ class ProductBundles:
         '''
         Check that bundleKey object for object that is entitled to bundling exists in the catalogue
         '''
-        print('checking bundled keys_')
-        print(self.indexes_bundle)
+        entitledItemExists=True
         for i in self.indexes_bundle:
             if i in self.ItemsDict:
-                print('matched bundleKey exists in catalogue')
                 entitledItemExists=True
             else:
-                print('There is no matching object to bundle')
                 entitledItemExists=False
-                #exit()
-
         
         return entitledItemExists
-        
+    
 
 
     def updateProductsList(self):
+        print('updateProductsList is called')
         '''
         Check the product list for existing items entitled, by bundleKey matching SKU
         and adjust the products and prices in the list accordingly for three cases:
@@ -112,89 +111,110 @@ class ProductBundles:
         '''
         product_sku=[self.products[index].SKU for index in range(len(self.products))]
         countproducts=Counter(product_sku)
+        print(countproducts)
         self.newProductsList=self.products
         count_bundled=Counter(self.indexes_bundle)
+        print(count_bundled)
         for i in count_bundled:
-            bundleItem=self.ItemsDict[i]
-            bundleItemZero=copy.deepcopy(bundleItem)
+            self.bundleItem=self.ItemsDict[i]
+            print(count_bundled[i])
+            bundleItemZero=copy.deepcopy(self.bundleItem)
             bundleItemZero.price=0.0
-            for j in countproducts:
-                if i==j:
+            if countproducts[i]: # countproducts contains at least one  bundleKey item
+                for j in countproducts:
+                    if i==j:     # bundleKey as SKU is in product list               
+                        bundleEntitledCount=count_bundled[i] # no. of bundle entitled items
+                        bundleKeyCount=countproducts[i] # no. of corresponding bundleKey items in list
+                        print('bundlekeycount {0} bundleentitledcount {1}'.format(bundleKeyCount,bundleEntitledCount))
                     
-                    bundleEntitledCount=count_bundled[i] # no. of bundle entitled items
-                    bundleKeyCount=countproducts[i] # no. of corresponding bundleKey items in list
-                    
-                    if bundleEntitledCount==bundleKeyCount: # Case 1
-                        print('Bundle Entitled items equals number of existing BundleKey items')
-                        for x in self.newProductsList:
-                            print('x sku {0}'.format(x.SKU))
-                            if x.SKU==i:
-                                x.price =0.0
+                        if bundleEntitledCount==bundleKeyCount: # Case 1
+                            print('Bundle Entitled items equals number of existing BundleKey items')
+                            for x in self.newProductsList:
+                                print('x sku {0}'.format(x.SKU))
+                                if x.SKU==i:
+                                    x.price =0.0
                                 
-                    if bundleKeyCount>bundleEntitledCount: # Case 2
-                        # delete bundleEntitledCount number of bundleKey items in product list
-                        # and append new bundleKey item (with price set to 0) to the list
-                        print('Buntle entitled items is less than existing number of bundleKey items')
-                        difference=bundleKeyCount-bundleEntitledCount
-                        # 
-                        x=0
-                        while x < difference-1:                            
-                            for y in self.newProductsList:
-                                if y.SKU==i:
-                                    self.newProductsList.pop()
-                                    self.newProductsList.append(bundleItemZero)
-                                    x+=1
+                        if bundleKeyCount>bundleEntitledCount: # Case 2
+                            # delete bundleEntitledCount number of bundleKey items in product list
+                            # and append new bundleKey item (with price set to 0) to the list
+                            print('Bundle entitled items is less than existing number of bundleKey items')
+                            difference=bundleKeyCount-bundleEntitledCount
+                            # 
+                            x=0
+                            while x < difference:                            
+                                for y in self.newProductsList:
+                                    if y.SKU==i:
+                                        self.newProductsList.pop(j)
+                                        self.newProductsList.append(bundleItemZero)
+                                        x+=1
                                     
-                    if bundleKeyCount<bundleEntitledCount: # Case 3
-                        # append extra entitled bundleKey items to the product list
-                        print('Number entitled is more than number existing in list')
-                        difference=bundleEntitledCount-bundleKeyCount
-                        y=0
-                        while y < difference:
-                            self.newProductsList.append(bundleItemZero)
-                            y+=1
-
-            
+                        if bundleKeyCount<bundleEntitledCount: # Case 3
+                            # append extra entitled bundleKey items to the product list
+                            print('Number entitled is more than number existing in list')
+                            difference=bundleEntitledCount-bundleKeyCount
+                            y=0
+                            while y < difference:
+                                self.newProductsList.append(bundleItemZero)
+                                y+=1
+            else: # bundleKey item is NOT in the current list. Append no. of bundle Entitled items to the list
+                bundleKeyCount=count_bundled[i]
+                y=0
+                while y <= bundleKeyCount-1:
+                    print(y)
+                    self.newProductsList.append(bundleItemZero)
+                    y+=1
+                    
+                    
+            updatedProductList=[x.SKU for x in self.newProductsList]
+            print(updatedProductList)
         return self.newProductsList
+        #return self.newProductsList
 
 
 
 def main():
     
-    # initialise a dict here -- could also be read from a DB/csv or json file maintained by the user
+    # initialise Products
 
     ipd = Product('ipd','Super ipad','549.99','bulkmin','4','499.99',None)
     mbp=Product('mbp','MacBook Pro','1399.99','bundled','1','0','vga')
     atv=Product('atv','Apple TV','109.50','buyYgetX','3','73',None)
     vga = Product('vga','VGA adaptor','30.00','bundledfree','0','0',None)
-
+    
+    # ItemDict is a catalogue of products 
     ItemsDict={'ipd':ipd, 'mbp':mbp, 'atv':atv,'vga':vga}
 
-    
-    #SKUs Scanned: atv, atv, atv, vga Total expected: $249.00
-    products=[atv,atv,atv,vga,vga,vga,mbp,mbp,mbp,mbp]
-    #products=[ atv, atv, atv, vga]
-    #products=[atv, ipd, ipd, atv, ipd, ipd, ipd]
-    #products=[mbp, vga, ipd]
 
-    bundles=ProductBundles(products,ItemsDict)
-    count_bundles=len(bundles.retrieveBundledItems().indexes_bundle)
-    print(count_bundles)
-    bundles.checkBundleKeyExistsInItemDict()
     
+    #test1=[atv,atv,atv,vga]  # Total expected 249.0
+    #test2=[atv,ipd,ipd,atv,ipd,ipd,ipd] # Total expected 2718.95
+    #test3=[mbp,vga,ipd] # Total expected 1949.9
+    
+    # Comment/uncomment one of the following three for the above tests
+    #products=[atv,atv,atv,vga]
+    products=[atv,ipd,ipd,atv,ipd,ipd,ipd]
+    #products=[mbp,vga,ipd]
+    
+    
+    
+    print('Original products list %s' % [x.SKU for x in products])
+
+
+    bundles=ProductBundles(products,ItemsDict).retrieveBundledItems()
+    count_bundles=len(bundles.indexes_bundle)
+    print('Number of items with bundle included: %s' %count_bundles)
+    bundles.checkBundleKeyExistsInItemDict()
+
 
     if count_bundles>0:
-        newProductList=bundles.updateProductsList()
-
-        new_productsList=newProductList
-
+        bundles.updateProductsList()
+        new_productsList=bundles.newProductsList
     else:
         new_productsList=products
-
+        
+    print('Final list %s' % [x.SKU for x in new_productsList])
     
 
-    #products=[atv,atv,atv,atv,atv,atv,mpd,vga]
-    #products = [ipd,ipd,ipd,ipd,ipd]
     shopping_cart = Checkout(new_productsList)
 
     order = shopping_cart.checkout()
