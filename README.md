@@ -3,8 +3,11 @@ Coding challenge represented from here https://github.com/DiUS/coding-tests/blob
 ###
 
 Business Rules:
+
 "3 for 2 on Apple TVs - 'buyYgetX' with minimum buy"
+
 "Ipad price drop to 499.99 if min purchase of 4"
+
 "Bundle free VGA adaptor with every MacBook pro sold"
 
 
