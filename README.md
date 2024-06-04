@@ -1,18 +1,19 @@
 # DiUS
 Coding challenge represented from here https://github.com/DiUS/coding-tests/blob/master/dius_shopping.md
-###
-
-##Business Rules:##
-
-"3 for 2 on Apple TVs - 'buyYgetX' with minimum buy"
-
-"Ipad price drop to 499.99 if min purchase of 4"
-
-"Bundle free VGA adaptor with every MacBook pro sold"
 
 
-### To run solution:
-input shopping cart items as list:  python Store.py 
+### Business Rules:
+
+- "3 for 2 on Apple TVs - 'buyYgetX' with minimum buy"
+
+- "Ipad price drop to 499.99 if min purchase of 4"
+
+- "Bundle free VGA adaptor with every MacBook pro sold"
+
+
+### To run the solution:
+input shopping cart items as list:  
+`python Store.py` 
 
 ### Solution explanation:
 Store owner maintains a spreadsheet repesenting the items available including their discount or bundling rules:
@@ -44,8 +45,8 @@ e.g. :
 The logic of bundle discounts ,buyYgetX, and bulkMin is programmed fully in the code, and the store owner need only update or add new items to the catalogue using the fields above, ensuring discounttype,minitems,discount and bundleKey are filled in appropriately.
 
  
-## Tests 
-# Unit tests for the ProductBundles class (out of time for the rest)
+# Tests 
+Unit tests for the ProductBundles class (out of time for the rest)
 
 `python Test.py` 
 
